@@ -1,0 +1,6 @@
+@SimpleSelfEmployApi_HostAddress = http://localhost:5263
+
+GET {{SimpleSelfEmployApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
