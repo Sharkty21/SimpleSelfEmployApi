@@ -1,3 +1,9 @@
+using Microsoft.Extensions.Options;
+using SimpleSelfEmploy.Data;
+using SimpleSelfEmploy.Models.Mongo;
+using SimpleSelfEmployApi.Data;
+using SimpleSelfEmployApi.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+builder.Services.AddSingleton<IMongoDbSettings>(serviceProvider => serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+builder.Services.AddScoped(typeof(IMongoDbRepository<>), typeof(MongoDbRepository<>));
+builder.Services.AddScoped(typeof(JobRepository));
+builder.Services.AddScoped(typeof(IJobService), typeof(JobService));
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -15,8 +27,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
