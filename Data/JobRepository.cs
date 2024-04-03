@@ -11,10 +11,10 @@ namespace SimpleSelfEmployApi.Data
             SetCollection("Jobs");
         }
 
-        public async Task<IQueryable<Job>> Index(int? pageNumber, int limit = 10)
+        public async Task<IQueryable<Job>> Index(int? page, int limit = 10)
         {
-            int page = (pageNumber ?? 1) - 1;
-            return AsQueryable().OrderBy(j => j.ModifiedDate).Skip(10 * page).Take(limit);
+            int pageNum = (page ?? 1) - 1;
+            return AsQueryable().OrderBy(j => j.ModifiedDate).Skip(10 * pageNum).Take(limit);
         }
     }
 }

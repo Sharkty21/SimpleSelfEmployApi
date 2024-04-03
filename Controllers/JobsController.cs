@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 using SimpleSelfEmployApi.Dtos;
-using SimpleSelfEmployApi.Models;
 using SimpleSelfEmployApi.Services;
 
 namespace SimpleSelfEmployApi.Controllers
@@ -20,18 +18,53 @@ namespace SimpleSelfEmployApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobDto>>> Index(int? pageNumber, int limit = 10)
+        public async Task<ActionResult<IEnumerable<JobDto>>> Index(int? page, int limit = 10)
         {
-            return Ok(await _jobService.Index(pageNumber, limit));
+            return Ok(await _jobService.Index(page, limit));
         }
 
         [HttpPost]
-        public async Task<ActionResult<JobDto>> Save(string? id, [FromBody] JobDto record)
+        public async Task<ActionResult<JobDto>> CreateNew(string? id, [FromBody] JobDto record)
+        {
+            return Ok(await Save(id, record));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<JobDto>> Update(string? id, [FromBody] JobDto record)
+        {
+            return Ok(await Save(id, record));
+        }
+
+        private async Task<ActionResult<JobDto>> Save(string? id, [FromBody] JobDto record)
         {
             if (!String.Equals(id ?? string.Empty, record.Id))
                 return BadRequest("Id mismatch");
 
             return Ok(await _jobService.SaveJob(record));
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<JobDto>> Detail(string id)
+        {
+            var job = await _jobService.GetJob(id);
+
+            if (job == null)
+                return NotFound();
+
+            return Ok(await _jobService.GetJob(id));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<JobDto>> Delete(string id)
+        {
+            var job = await _jobService.GetJob(id);
+
+            if (job == null)
+                return NotFound();
+
+            bool success = await _jobService.DeleteJob(id);
+
+            return Ok($"Delete {id} successful.");
         }
     }
 }

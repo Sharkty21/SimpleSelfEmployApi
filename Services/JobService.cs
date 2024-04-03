@@ -17,9 +17,9 @@ namespace SimpleSelfEmployApi.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<JobDto>> Index(int? pageNumber, int limit = 10)
+        public async Task<IEnumerable<JobDto>> Index(int? page, int limit = 10)
         {
-            var query = await _repository.Index(pageNumber, limit);
+            var query = await _repository.Index(page, limit);
             return query.ToList().Select(j => j.JobDto);
         }
 
@@ -40,6 +40,32 @@ namespace SimpleSelfEmployApi.Services
 
             await _repository.ReplaceOneAsync(jobModel ?? new Job());
             return jobModel.JobDto;
+        }
+
+        public async Task<JobDto> GetJob(string id)
+        {
+            try
+            {
+                var job = await _repository.FindByIdAsync(id);
+                return job.JobDto;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteJob(string id)
+        {
+            try
+            {
+                await _repository.DeleteByIdAsync(id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }
