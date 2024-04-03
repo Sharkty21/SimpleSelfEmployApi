@@ -13,6 +13,8 @@ namespace SimpleSelfEmployApi.Profiles
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => MapId(src.Id)));
             CreateMap<Job, JobDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
+            CreateMap<PaymentDto, Payment>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => MapId(src.Id)));
         }
 
         private ObjectId MapId(string id)

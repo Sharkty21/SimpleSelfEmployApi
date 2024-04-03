@@ -16,6 +16,8 @@ builder.Services.AddSingleton<IMongoDbSettings>(serviceProvider => serviceProvid
 builder.Services.AddScoped(typeof(IMongoDbRepository<>), typeof(MongoDbRepository<>));
 builder.Services.AddScoped(typeof(JobRepository));
 builder.Services.AddScoped(typeof(IJobService), typeof(JobService));
+builder.Services.AddScoped(typeof(PaymentRepository));
+builder.Services.AddScoped(typeof(IPaymentService), typeof(PaymentService));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
