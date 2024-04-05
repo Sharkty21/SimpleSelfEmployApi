@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using SimpleSelfEmploy.Data;
 using SimpleSelfEmploy.Models.Mongo;
@@ -20,6 +21,7 @@ builder.Services.AddScoped(typeof(PaymentRepository));
 builder.Services.AddScoped(typeof(IPaymentService), typeof(PaymentService));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -30,6 +32,16 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader()
                    .AllowCredentials();
         });
+});
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = builder.Configuration["Auth0:Domain"];
+    options.Audience = builder.Configuration["Auth0:Audience"];
 });
 
 var app = builder.Build();
@@ -46,6 +58,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

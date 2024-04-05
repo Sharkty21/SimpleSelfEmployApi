@@ -35,12 +35,12 @@ namespace SimpleSelfEmployApi.Controllers
             return Ok(await Save(id, record));
         }
 
-        private async Task<ActionResult<JobDto>> Save(string? id, [FromBody] JobDto record)
+        private async Task<JobDto> Save(string? id, [FromBody] JobDto record)
         {
             if (!String.Equals(id ?? string.Empty, record.Id))
-                return BadRequest("Id mismatch");
+                throw new Exception("Id mismatch");
 
-            return Ok(await _jobService.SaveJob(record));
+            return await _jobService.SaveJob(record);
         }
 
         [HttpGet("{id}")]

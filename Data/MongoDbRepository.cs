@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using SimpleSelfEmploy.Models.Mongo;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 
 namespace SimpleSelfEmploy.Data
@@ -10,15 +11,31 @@ namespace SimpleSelfEmploy.Data
     {
         private IMongoCollection<TMongoDbDocument> _collection;
         private readonly IMongoDatabase _database;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public MongoDbRepository(IMongoDbSettings settings)
+        public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor)
         {
             _database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public void SetCollection(string collectionName)
         {
-            _collection = _database.GetCollection<TMongoDbDocument>(collectionName);
+            // Retrieve the JWT token from the Authorization header
+            var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            // Decode the JWT token
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            // Retrieve the user ID from the 'sub' claim
+            var userId = jwtToken?.Subject;
+
+            if (string.IsNullOrEmpty(userId))
+                throw new Exception();
+
+            _collection = _database.GetCollection<TMongoDbDocument>(userId + ": " + collectionName);
         }
 
         public void OnUpdate(TMongoDbDocument document, bool isNew)

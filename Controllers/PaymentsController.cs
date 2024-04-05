@@ -35,12 +35,12 @@ namespace SimpleSelfEmployApi.Controllers
             return Ok(await Save(id, record));
         }
 
-        private async Task<ActionResult<PaymentDto>> Save(string? id, [FromBody] PaymentDto record)
+        private async Task<PaymentDto> Save(string? id, [FromBody] PaymentDto record)
         {
             if (!String.Equals(id ?? string.Empty, record.Id))
-                return BadRequest("Id mismatch");
+                throw new Exception("Id mistmatch");
 
-            return Ok(await _PaymentService.SavePayment(record));
+            return await _PaymentService.SavePayment(record);
         }
 
         [HttpGet("{id}")]
