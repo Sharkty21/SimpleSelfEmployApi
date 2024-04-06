@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimpleSelfEmployApi.Dtos;
 using SimpleSelfEmployApi.Services;
 
 namespace SimpleSelfEmployApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class JobsController : ControllerBase

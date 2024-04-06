@@ -35,7 +35,7 @@ namespace SimpleSelfEmploy.Data
             if (string.IsNullOrEmpty(userId))
                 throw new Exception();
 
-            _collection = _database.GetCollection<TMongoDbDocument>(userId + ": " + collectionName);
+            _collection = _database.GetCollection<TMongoDbDocument>(userId + " - " + collectionName);
         }
 
         public void OnUpdate(TMongoDbDocument document, bool isNew)
