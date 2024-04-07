@@ -1,18 +1,32 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using SimpleSelfEmploy.Data;
 using SimpleSelfEmploy.Models.Mongo;
 using SimpleSelfEmployApi.Data;
 using SimpleSelfEmployApi.Services;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+var env = builder.Environment.EnvironmentName;
+var appName = builder.Environment.ApplicationName;
+
+var kvUri = "https://sse-KeyVault.vault.azure.net";
+var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
+var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
+var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+//Configure Database
+builder.Configuration.GetSection("MongoDbSettings").Bind(mongoDbSettings);
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+//Configure Services
 builder.Services.AddSingleton<IMongoDbSettings>(serviceProvider => serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 builder.Services.AddScoped(typeof(IMongoDbRepository<>), typeof(MongoDbRepository<>));
 builder.Services.AddScoped(typeof(JobRepository));
