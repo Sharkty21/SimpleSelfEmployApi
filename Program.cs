@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment.EnvironmentName;
 var appName = builder.Environment.ApplicationName;
 
-var kvUri = "https://sse-KeyVault.vault.azure.net";
+var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
 var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
 var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
 var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
@@ -47,6 +47,17 @@ builder.Services.AddCors(options =>
                    .AllowCredentials();
         });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowProductionReactApp",
+        builder =>
+        {
+            builder.WithOrigins("https://simple-self-employ.vercel.app")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -70,6 +81,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseHttpsRedirection();
+    app.UseCors("AllowProductionReactApp");
 }
 
 app.UseAuthentication();
