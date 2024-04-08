@@ -6,7 +6,7 @@ namespace SimpleSelfEmployApi.Data
 {
     public class PaymentRepository : MongoDbRepository<Payment>
     {
-        public PaymentRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor, ILogger logger) : base(settings, httpContextAccessor, logger)
+        public PaymentRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor) : base(settings, httpContextAccessor)
         {
             SetCollection("Payments");
         }

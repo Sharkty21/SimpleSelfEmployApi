@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Serilog;
 using SimpleSelfEmploy.Models.Mongo;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,10 +16,18 @@ namespace SimpleSelfEmploy.Data
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor, ILogger logger)
+        public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor)
         {
-            logger.LogInformation($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
-            Trace.TraceError($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.Seq("http://localhost:5341")
+            .CreateLogger();
+
+            Log.Information($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
+
+            // Important to call at exit so that batched events are flushed.
+            Log.CloseAndFlush();
+
             _database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
             _httpContextAccessor = httpContextAccessor;
         }

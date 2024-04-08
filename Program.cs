@@ -1,13 +1,13 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Logging.AzureAppServices;
 using Microsoft.Extensions.Options;
 using SimpleSelfEmploy.Data;
 using SimpleSelfEmploy.Models.Mongo;
 using SimpleSelfEmployApi.Data;
 using SimpleSelfEmployApi.Services;
 using System.Text.Json;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment.EnvironmentName;
@@ -18,15 +18,15 @@ var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
 var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
 var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
 
-builder.Logging.AddAzureWebAppDiagnostics();
-builder.Services.Configure<AzureFileLoggerOptions>(options =>
-{
-    options.FileName = "logs-";
-    options.FileSizeLimit = 50 * 1024;
-    options.RetainedFileCountLimit = 5;
-});
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
+    .CreateLogger();
 
-System.Diagnostics.Trace.TraceError($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0,5)}");
+Log.Information($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0, 5)}");
+
+// Important to call at exit so that batched events are flushed.
+Log.CloseAndFlush();
 
 // Add services to the container.
 
