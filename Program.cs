@@ -13,20 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment.EnvironmentName;
 var appName = builder.Environment.ApplicationName;
 
-var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
-var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
-var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
-var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
-
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
-    .CreateLogger();
-
-Log.Information($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0, 5)}");
-
-// Important to call at exit so that batched events are flushed.
-Log.CloseAndFlush();
+//var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
+//var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
+//var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
+//var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
+var mongoDbSettings = new MongoDbSettings
+{
+    ConnectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTIONSTRING"),
+    DatabaseName = "SimpleSelfEmploy"
+};
 
 // Add services to the container.
 

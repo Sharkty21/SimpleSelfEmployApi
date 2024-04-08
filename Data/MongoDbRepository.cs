@@ -18,16 +18,6 @@ namespace SimpleSelfEmploy.Data
 
         public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor)
         {
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.Seq("http://localhost:5341")
-            .CreateLogger();
-
-            Log.Information($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
-
-            // Important to call at exit so that batched events are flushed.
-            Log.CloseAndFlush();
-
             _database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
             _httpContextAccessor = httpContextAccessor;
         }
