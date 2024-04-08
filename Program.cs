@@ -13,15 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment.EnvironmentName;
 var appName = builder.Environment.ApplicationName;
 
-//var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
-//var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
-//var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
-//var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
-var mongoDbSettings = new MongoDbSettings
-{
-    ConnectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTIONSTRING"),
-    DatabaseName = "SimpleSelfEmploy"
-};
+var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
+var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
+var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
+var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
 
 // Add services to the container.
 
@@ -30,10 +25,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 //Configure Database
-builder.Configuration.GetSection("MongoDbSettings").Bind(mongoDbSettings);
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
-//Configure Services
+builder.Services.Configure<MongoDbSettings>(options =>
+{
+    options.ConnectionString = mongoDbSettings.ConnectionString;
+    options.DatabaseName = mongoDbSettings.DatabaseName;
+});
 builder.Services.AddSingleton<IMongoDbSettings>(serviceProvider => serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+
+//Configure Services
 builder.Services.AddScoped(typeof(IMongoDbRepository<>), typeof(MongoDbRepository<>));
 builder.Services.AddScoped(typeof(JobRepository));
 builder.Services.AddScoped(typeof(IJobService), typeof(JobService));
