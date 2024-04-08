@@ -17,7 +17,7 @@ var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
 var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
 var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
 
-System.Diagnostics.Trace.WriteLine($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0,5)}");
+System.Diagnostics.Trace.TraceError($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0,5)}");
 
 // Add services to the container.
 

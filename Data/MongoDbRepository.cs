@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using SimpleSelfEmploy.Models.Mongo;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 
@@ -16,7 +17,7 @@ namespace SimpleSelfEmploy.Data
 
         public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor)
         {
-            System.Diagnostics.Trace.WriteLine($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
+            Trace.TraceError($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
             _database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
             _httpContextAccessor = httpContextAccessor;
         }
