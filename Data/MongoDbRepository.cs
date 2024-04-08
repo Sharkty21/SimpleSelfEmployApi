@@ -15,8 +15,9 @@ namespace SimpleSelfEmploy.Data
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor)
+        public MongoDbRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor, ILogger logger)
         {
+            logger.LogInformation($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
             Trace.TraceError($"The connection string starts with {settings?.ConnectionString?.Substring(0, 5)}");
             _database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
             _httpContextAccessor = httpContextAccessor;

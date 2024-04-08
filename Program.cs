@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Logging.AzureAppServices;
 using Microsoft.Extensions.Options;
 using SimpleSelfEmploy.Data;
 using SimpleSelfEmploy.Models.Mongo;
@@ -16,6 +17,14 @@ var kvUri = builder.Configuration["KeyVault:KeyVaultUrl"];
 var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential());
 var mongoDbSettingsResponse = await client.GetSecretAsync($"{env}-{appName}-MongoDbSettings");
 var mongoDbSettings = JsonSerializer.Deserialize<MongoDbSettings>(mongoDbSettingsResponse.Value.Value);
+
+builder.Logging.AddAzureWebAppDiagnostics();
+builder.Services.Configure<AzureFileLoggerOptions>(options =>
+{
+    options.FileName = "logs-";
+    options.FileSizeLimit = 50 * 1024;
+    options.RetainedFileCountLimit = 5;
+});
 
 System.Diagnostics.Trace.TraceError($"Deploying {env} to {appName}. The connection string starts with {mongoDbSettings?.ConnectionString?.Substring(0,5)}");
 

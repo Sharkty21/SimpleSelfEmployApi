@@ -6,7 +6,7 @@ namespace SimpleSelfEmployApi.Data
 {
     public class JobRepository : MongoDbRepository<Job>
     {
-        public JobRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor) : base(settings, httpContextAccessor)
+        public JobRepository(IMongoDbSettings settings, IHttpContextAccessor httpContextAccessor, ILogger logger) : base(settings, httpContextAccessor, logger)
         {
             SetCollection("Jobs");
         }
